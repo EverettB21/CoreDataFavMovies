@@ -23,3 +23,16 @@ struct APIMovie: Codable, Identifiable, Hashable {
     }
 
 }
+
+extension Movie {
+    var posterURL: URL? {
+        return URL(string: posterURLString ?? "")
+    }
+}
+
+extension Movie {
+    func toApiMovie() -> APIMovie {
+        var newApiMovie = APIMovie(title: self.title ?? "", year: self.year ?? "", imdbID: self.imdbID ?? "", posterURL: self.posterURL)
+        return newApiMovie
+    }
+}

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Kingfisher
 
 class MovieTableViewCell: UITableViewCell {
 
@@ -21,17 +20,44 @@ class MovieTableViewCell: UITableViewCell {
     
     private var apiMovie: APIMovie?
     
-    private var heart = UIImage(systemName: "heart")
-    private var favoritedHeart = UIImage(systemName: "heart.fill")
+    var heart = UIImage(systemName: "heart")
+    var favoritedHeart = UIImage(systemName: "heart.fill")
     private let placeholder = UIImage(named: "moviePlaceholder")
     
+    func update(with movie: Movie, onFavorite: (() -> Void)?) {
+        self.apiMovie = movie.toApiMovie()
+        self.onFavorite = onFavorite
+        titleLabel.text = movie.title
+        yearLabel.text = movie.year
+        if let url = movie.posterURL {
+            Task {
+                let (data, response) = try await URLSession.shared.data(from: url)
+                guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.posterImageView.image = UIImage(data: data)
+                }
+            }
+        }
+    }
     
     func update(with movie: APIMovie, onFavorite: (() -> Void)?) {
         self.apiMovie = movie
         self.onFavorite = onFavorite
-        posterImageView.kf.setImage(with: movie.posterURL, placeholder: placeholder)
         titleLabel.text = movie.title
         yearLabel.text = movie.year
+        if let url = movie.posterURL {
+            Task {
+                let (data, response) = try await URLSession.shared.data(from: url)
+                guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.posterImageView.image = UIImage(data: data)
+                }
+            }
+        }
     }
 
     func setFavorite() {
